@@ -1,0 +1,47 @@
+import os
+
+import discord
+from discord.ext import commands
+from discord.flags import Intents
+from dotenv import load_dotenv
+
+from logging_config import setup_logging
+from commands.misc import MiscCommandCog
+from commands.moderation import ModerationCommandGroup
+from events import Events
+
+load_dotenv()
+TEST_GUILD_ID = os.getenv("TEST_GUILD")
+TEST_GUILD = discord.Object(id=TEST_GUILD_ID)
+PRIMARY_GUILD_ID = os.getenv("PRIMARY_GUILD")
+PRIMARY_GUILD = discord.Object(id=PRIMARY_GUILD_ID)
+TOKEN = os.getenv("DISCORD_TOKEN")
+ENV = os.getenv("ENV")
+
+
+class DegeneBot(commands.Bot):
+    def __init__(self, intents: Intents, activity: discord.Activity = None) -> None:
+        super().__init__(command_prefix="!", intents=intents, activity=activity)
+
+    async def setup_hook(self):
+        await self.add_cog(Events(self))
+        await self.add_cog(MiscCommandCog(self))
+
+        self.tree.add_command(ModerationCommandGroup(self))
+
+        if ENV == "dev":
+            self.tree.copy_global_to(guild=TEST_GUILD)
+            await self.tree.sync(guild=TEST_GUILD)
+        elif ENV == "prod":
+            self.tree.copy_global_to(guild=PRIMARY_GUILD)
+            await self.tree.sync(guild=PRIMARY_GUILD)
+
+
+logging_handler = setup_logging()
+
+bot_activity = discord.Activity(
+    type=discord.ActivityType.watching, name="for degen activity."
+)
+bot = DegeneBot(intents=discord.Intents.all(), activity=bot_activity)
+
+bot.run(TOKEN, log_handler=None)

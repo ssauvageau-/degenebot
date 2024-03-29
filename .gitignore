@@ -1,0 +1,14 @@
+.env
+degenebot.iml
+*.xml
+.git/
+.idea/
+venv/
+.venv/
+.vscode
+__pycache__/
+*.log
+*.exe
+*.edn
+logs/
+json/
