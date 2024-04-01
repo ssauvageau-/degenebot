@@ -53,6 +53,20 @@ class MiscCommandCog(commands.Cog):
         tmp_embed.set_author(name=message.author.name, icon_url=message.author.avatar)
         await interaction.response.send_message(embed=tmp_embed)
 
+    @app_commands.command(name="pfp", description="Receive a user's profile picture.")
+    async def pfp(self, interaction: discord.Interaction, user: discord.User):
+        avatar = user.display_avatar
+        if avatar.is_animated():
+            fn = str(user.id) + ".gif"
+        else:
+            fn = str(user.id) + ".png"
+        await avatar.save(fn)
+        await interaction.response.send_message(file=discord.File(fn), ephemeral=True)
+        if os.path.exists(fn):
+            os.remove(fn)
+        else:
+            print(f"Error occurred when deleting file:\t{fn}")
+
     @app_commands.command(name="mobile")
     async def mobile_image(self, interaction: discord.Interaction, user: discord.User):
         avatar = user.display_avatar
