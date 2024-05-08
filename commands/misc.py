@@ -16,6 +16,7 @@ class MiscCommandCog(commands.Cog):
         self.mobile_path = "images/MobileDiscord.png"
         self.embed_path = "images/EmbedDiscord.png"
         self.log_channel = "degen-log"
+        self.quote_channel = "quotes"
         super().__init__()
 
     @app_commands.command(name="f", description="Pay respects. 'to' is optional.")
@@ -52,6 +53,33 @@ class MiscCommandCog(commands.Cog):
         tmp_embed.add_field(name="", value=message.jump_url)
         tmp_embed.set_author(name=message.author.name, icon_url=message.author.avatar)
         await interaction.response.send_message(embed=tmp_embed)
+
+    @app_commands.command(
+        name="quote_submit",
+        description="Quote a message into the server's quotes channel (if it exists).",
+    )
+    async def quote_submit(self, interaction: discord.Interaction, link: str):
+        msg = link.split("/")
+        guild = interaction.guild
+        quotes_channel = discord.utils.find(
+            lambda channel: channel.name == self.quote_channel,
+            guild.channels,
+        )
+        if quotes_channel is None:
+            raise Exception("Quotes channel not found")
+        channel_id = int(msg[5])
+        message_id = int(msg[6])
+        channel = guild.get_channel(channel_id)
+        message = await channel.fetch_message(message_id)
+        tmp_embed = discord.Embed(
+            color=message.author.color,
+            timestamp=message.created_at,
+            description=message.content,
+        )
+        tmp_embed.add_field(name="", value=message.jump_url)
+        tmp_embed.set_author(name=message.author.name, icon_url=message.author.avatar)
+        await quotes_channel.send(embed=tmp_embed)
+        await interaction.response.send_message("Quoted the supplied message!")
 
     @app_commands.command(name="pfp", description="Receive a user's profile picture.")
     async def pfp(self, interaction: discord.Interaction, user: discord.User):
