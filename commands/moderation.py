@@ -8,7 +8,7 @@ import discord
 from discord import app_commands, TextStyle
 from discord.ext import commands
 
-COMMAND_ROLE_ALLOW_LIST = ["Skar"]
+COMMAND_ROLE_ALLOW_LIST = ["Actual Admin"]
 
 
 @app_commands.guild_only()
@@ -17,13 +17,14 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
         self.logger = logging.getLogger("bot")
         self.log_channel_name = "degen-log"
         self.bot = bot
+        self.archive_cat = 1242564359712935977
         super().__init__()
 
     @app_commands.command(
         name="clear-messages",
         description="Delete a number of recent messages in the channel",
     )
-    @app_commands.describe(number="The number of recent messages to delete")
+    @app_commands.describe(number="The number of recent messages to delete.")
     @app_commands.checks.has_any_role(*COMMAND_ROLE_ALLOW_LIST)
     async def clear(self, interaction: discord.Interaction, number: int):
         await interaction.response.defer(ephemeral=True, thinking=True)
@@ -40,3 +41,40 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
                 await message.delete()
 
         await interaction.followup.send(f"Deleted {number} messages", ephemeral=True)
+
+    @app_commands.command(
+        name="move_channel",
+        description="Moves a channel into the specified Category. Does not touch permissions.",
+    )
+    @app_commands.describe(
+        channel_name="The channel to move. Case-sensitive.",
+        category_name="The category to move the channel to. Case-sensitive.",
+    )
+    @app_commands.checks.has_any_role(*COMMAND_ROLE_ALLOW_LIST)
+    async def move_channel(
+        self, interaction: discord.Interaction, channel_name: str, category_name: str
+    ):
+        await interaction.response.defer(ephemeral=True, thinking=True)
+
+        channel = ""
+        cat = ""
+
+        for ch in interaction.guild.channels:
+            if ch.name == channel_name:
+                channel = ch
+            elif ch.name == category_name:
+                cat = ch
+        if not channel:
+            await interaction.followup.send(
+                f"Could not identify channel with name: {channel_name}."
+            )
+            return
+        if not cat:
+            await interaction.followup.send(
+                f"Could not identify channel with name: {category_name}."
+            )
+            return
+        await channel.edit(category=cat)
+        await interaction.followup.send(
+            f"Successfully moved {channel_name} to {category_name}."
+        )
