@@ -3,6 +3,8 @@ import random
 import re
 import os
 
+from aiohttp import ClientSession
+
 from PIL import Image, ImageSequence, ImageDraw, ImageFont
 import discord
 from discord import app_commands
@@ -46,76 +48,168 @@ class Events(commands.Cog):
 
     @commands.Cog.listener(name="on_message")
     async def vel_event(self, message: discord.Message):
-        vel_id = 234455334033293312
+        vel_id = 234455334033293312  # <-- Vel
         if message.author.id == vel_id and "gay" in message.content.lower():
             msg = message.content
 
-            idx = msg.lower().find(" gay")
-            ln = 44
-            if idx == -1:  # no space
-                idx = 0
-                text = msg[: idx + 3] if idx < ln - 3 else msg[idx - (ln - 3) : idx + 3]
-            else:
-                text = msg[: idx + 4] if idx < ln - 4 else msg[idx - (ln - 4) : idx + 4]
-            text = text.strip()
-            if text != msg.lower():
-                text = "-" + text + "-"
-            size = 16 if len(text) > 20 else 24
-            font = ImageFont.truetype("calibrib.ttf", size)
-            text = self.get_wrapped_text(text, font, 100)
+            if "<:gay:" in msg.lower():
+                # emote message
+                avatar = message.author.display_avatar
+                fn = str(vel_id) + "_temp"
+                fn_o = "vel_output.gif"
+                frame_list = []
+                emote = msg[
+                    msg.lower()
+                    .find("<:gay:") : msg.lower()
+                    .find(">", msg.lower().find("<:gay:"))
+                ].split(":")
+                num = emote[2] if emote[0] != "a" else emote[3]
+                e_url = f"https://cdn.discordapp.com/emojis/{num}.png"
+                fn_e = num + ".png"
 
-            avatar = message.author.display_avatar
-            fn = str(vel_id) + "_temp"
-            fn_o = "vel_output.gif"
-            frame_list = []
-            await avatar.save(fn)
-            with Image.open(fn) as im:
-                idx = 1
-                duration = 0
-                for frame in ImageSequence.Iterator(im):
-                    frame_list.append(
-                        self.build_vel_meme(frame, self.vel_meme_path, text, font)
+                # download emoji
+                async with ClientSession() as session:
+                    async with session.get(e_url) as resp:
+                        emoji = await resp.read()
+
+                with open(fn_e, "wb") as binary:
+                    binary.write(emoji)
+
+                await avatar.save(fn)
+                with Image.open(fn) as im:
+                    idx = 1
+                    duration = 0
+                    for frame in ImageSequence.Iterator(im):
+                        frame_list.append(
+                            self.build_vel_emote_meme(frame, self.vel_meme_path, fn_e)
+                        )
+                        idx += 1
+                        try:
+                            duration += im.info["duration"]
+                        except KeyError:
+                            continue
+                    frame_duration = int(idx / duration) if duration > 0 else 1000
+                frame_list[0].save(
+                    fn_o,
+                    save_all=True,
+                    append_images=frame_list[1:],
+                    optimize=False,
+                    duration=frame_duration,
+                    loop=0,
+                )
+                await message.reply(file=discord.File(fp=fn_o))
+                if os.path.exists(fn):
+                    os.remove(fn)
+                else:
+                    print(f"Error occurred when deleting file:\t{fn}")
+                if os.path.exists(fn_o):
+                    os.remove(fn_o)
+                else:
+                    print(f"Error occurred when deleting file:\t{fn_o}")
+                if os.path.exists(fn_e):
+                    os.remove(fn_e)
+                else:
+                    print(f"Error occurred when deleting file:\t{fn_e}")
+            else:
+                # not an emote message
+                idx = msg.lower().find(" gay")
+                ln = 44
+                if idx == -1:  # no space
+                    idx = 0
+                    text = (
+                        msg[: idx + 3]
+                        if idx < ln - 3
+                        else msg[idx - (ln - 3) : idx + 3]
                     )
-                    idx += 1
-                    try:
-                        duration += im.info["duration"]
-                    except KeyError:
-                        continue
-                frame_duration = int(idx / duration) if duration > 0 else 1000
-            frame_list[0].save(
-                fn_o,
-                save_all=True,
-                append_images=frame_list[1:],
-                optimize=False,
-                duration=frame_duration,
-                loop=0,
-            )
-            await message.reply(file=discord.File(fp=fn_o))
-            if os.path.exists(fn):
-                os.remove(fn)
-            else:
-                print(f"Error occurred when deleting file:\t{fn}")
-            if os.path.exists(fn_o):
-                os.remove(fn_o)
-            else:
-                print(f"Error occurred when deleting file:\t{fn_o}")
+                else:
+                    text = (
+                        msg[: idx + 4]
+                        if idx < ln - 4
+                        else msg[idx - (ln - 4) : idx + 4]
+                    )
+                text = text.strip()
+                if text != msg.lower():
+                    text = "-" + text + "-"
+                size = 16 if len(text) > 20 else 24
+                font = ImageFont.truetype("calibrib.ttf", size)
+                text = self.get_wrapped_text(text, font, 100)
+
+                avatar = message.author.display_avatar
+                fn = str(vel_id) + "_temp"
+                fn_o = "vel_output.gif"
+                frame_list = []
+                await avatar.save(fn)
+                with Image.open(fn) as im:
+                    idx = 1
+                    duration = 0
+                    for frame in ImageSequence.Iterator(im):
+                        frame_list.append(
+                            self.build_vel_meme(frame, self.vel_meme_path, text, font)
+                        )
+                        idx += 1
+                        try:
+                            duration += im.info["duration"]
+                        except KeyError:
+                            continue
+                    frame_duration = int(idx / duration) if duration > 0 else 1000
+                frame_list[0].save(
+                    fn_o,
+                    save_all=True,
+                    append_images=frame_list[1:],
+                    optimize=False,
+                    duration=frame_duration,
+                    loop=0,
+                )
+                await message.reply(file=discord.File(fp=fn_o))
+                if os.path.exists(fn):
+                    os.remove(fn)
+                else:
+                    print(f"Error occurred when deleting file:\t{fn}")
+                if os.path.exists(fn_o):
+                    os.remove(fn_o)
+                else:
+                    print(f"Error occurred when deleting file:\t{fn_o}")
 
     def build_vel_meme(
         self, icon: Image, path: str, msg: str, font: ImageFont.ImageFont
     ):
         meme = Image.open(path)
-        iresize = icon.resize((88, 88), Image.LANCZOS)
+        i_dim = 88
+        iresize = icon.resize((i_dim, i_dim), Image.LANCZOS)
         x1, y1 = 29, 112
-        x2, y2 = 117, 200
+        x2, y2 = x1 + i_dim, y1 + i_dim
         mask = iresize.convert("RGBA")
         meme.paste(iresize, (x1, y1, x2, y2), mask)
         x1, y1 = 429, 113
-        x2, y2 = 517, 201
+        x2, y2 = x1 + i_dim, y1 + i_dim
         mask = iresize.convert("RGBA")
         meme.paste(iresize, (x1, y1, x2, y2), mask)
 
         draw = ImageDraw.Draw(meme)
         draw.text((30, 40), msg, font=font, fill="#000000")
+        return meme
+
+    def build_vel_emote_meme(self, icon: Image, path: str, emote: str):
+        meme = Image.open(path)
+        i_dim = 88
+        iresize = icon.resize((i_dim, i_dim), Image.LANCZOS)
+        x1, y1 = 29, 112
+        x2, y2 = x1 + i_dim, y1 + i_dim
+        mask = iresize.convert("RGBA")
+        meme.paste(iresize, (x1, y1, x2, y2), mask)
+        x1, y1 = 429, 113
+        x2, y2 = x1 + i_dim, y1 + i_dim
+        mask = iresize.convert("RGBA")
+        meme.paste(iresize, (x1, y1, x2, y2), mask)
+
+        emoji = Image.open(emote)
+        e_dim = 64
+        eresize = emoji.resize((e_dim, e_dim), Image.LANCZOS)
+        x1, y1 = 64, 40
+        x2, y2 = x1 + e_dim, y1 + e_dim
+        mask = eresize.convert("RGBA")
+        meme.paste(eresize, (x1, y1, x2, y2), mask)
+
         return meme
 
     def get_wrapped_text(self, text: str, font: ImageFont.ImageFont, line_length: int):
