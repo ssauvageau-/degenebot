@@ -1,7 +1,9 @@
 import logging
 import random
 import re
+import os
 
+from PIL import Image, ImageSequence, ImageDraw, ImageFont
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -18,6 +20,7 @@ class Events(commands.Cog):
         self.log_channel_name = "degen-log"
         self.bot = bot
         self.timeline = {}
+        self.vel_meme_path = "images/VelMeme.png"
 
     @commands.Cog.listener(name="on_error")
     async def log_error(self, event: str, *args, **kwargs):
@@ -40,6 +43,85 @@ class Events(commands.Cog):
             await message.channel.send(message.content)
             await message.delete()
             self.logger.info(f"nerd event triggered on message {message.jump_url}")
+
+    @commands.Cog.listener(name="on_message")
+    async def vel_event(self, message: discord.Message):
+        vel_id = 234455334033293312
+        if message.author.id == vel_id and "gay" in message.content.lower():
+            msg = message.content
+
+            idx = msg.lower().find("gay")
+            ln = 28
+            text = msg[: idx + 3] if idx < ln - 3 else msg[idx - (ln - 3) : idx + 3]
+            text = text.strip()
+            text = "-" + text + "-"
+            font = ImageFont.truetype("calibrib.ttf", 16)
+            text = self.get_wrapped_text(text, font, 54)
+
+            avatar = message.author.display_avatar
+            fn = str(vel_id) + "_temp"
+            fn_o = "vel_output.gif"
+            frame_list = []
+            await avatar.save(fn)
+            with Image.open(fn) as im:
+                idx = 1
+                duration = 0
+                for frame in ImageSequence.Iterator(im):
+                    frame_list.append(
+                        self.build_vel_meme(frame, self.vel_meme_path, text, font)
+                    )
+                    idx += 1
+                    try:
+                        duration += im.info["duration"]
+                    except KeyError:
+                        continue
+                frame_duration = int(idx / duration) if duration > 0 else 1000
+            frame_list[0].save(
+                fn_o,
+                save_all=True,
+                append_images=frame_list[1:],
+                optimize=False,
+                duration=frame_duration,
+                loop=0,
+            )
+            await message.reply(file=discord.File(fp=fn_o))
+            if os.path.exists(fn):
+                os.remove(fn)
+            else:
+                print(f"Error occurred when deleting file:\t{fn}")
+            if os.path.exists(fn_o):
+                os.remove(fn_o)
+            else:
+                print(f"Error occurred when deleting file:\t{fn_o}")
+
+    def build_vel_meme(
+        self, icon: Image, path: str, msg: str, font: ImageFont.ImageFont
+    ):
+        meme = Image.open(path)
+        iresize = icon.resize((88, 88), Image.LANCZOS)
+        x1, y1 = 29, 112
+        x2, y2 = 117, 200
+        mask = iresize.convert("RGBA")
+        meme.paste(iresize, (x1, y1, x2, y2), mask)
+        x1, y1 = 429, 113
+        x2, y2 = 517, 201
+        mask = iresize.convert("RGBA")
+        meme.paste(iresize, (x1, y1, x2, y2), mask)
+
+        draw = ImageDraw.Draw(meme)
+        draw.text((30, 40), msg, font=font, fill="#000000")
+        return meme
+
+    def get_wrapped_text(self, text: str, font: ImageFont.ImageFont, line_length: int):
+        # from https://stackoverflow.com/a/67203353
+        lines = [""]
+        for word in text.split():
+            line = f"{lines[-1]} {word}".strip()
+            if font.getlength(line) <= line_length:
+                lines[-1] = line
+            else:
+                lines.append(word)
+        return "\n".join(lines)
 
     @commands.Cog.listener(name="on_message")
     async def based_event(self, message: discord.Message):
@@ -88,11 +170,6 @@ class Events(commands.Cog):
             "🤔👀": "<:thinkeyes:359798823486226443>",
             "🤔👌": "<:ok_thinking:359798825763995648>",
             "🤔⬆️⬆️⬇️⬇️⬅️➡️⬅️➡️🇧🇦": f"{message.author.mention} is a nerd! 🤓",
-            "<:thonking:327364004211064832><:thonking:327364004211064832>": "<a:thonkered:540696116069400607>",
-            "🤔🐦": "<:mayayy:1153451055657517077>",
-            "🤔🔥": "<:finethink:1153504940178817034>",
-            "<:kappaScorv:562136888731762688><:kappaScorv:562136888731762688>": "<:scorvChaos:655350057205235712>",
-            "<:kappaScorv:562136888731762688>🔫": "<:scorvgun:792202763379015681>",
         }
 
         pruned = message.content.replace(" ", "")
