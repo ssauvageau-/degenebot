@@ -46,10 +46,8 @@ class Events(commands.Cog):
 
     @commands.Cog.listener(name="on_message")
     async def vel_event(self, message: discord.Message):
-        vel_id = 136586501436735488  # 234455334033293312
-        if message.author.id == vel_id and (
-            " gay" in message.content.lower() or "gay" in message.content.lower()
-        ):
+        vel_id = 234455334033293312
+        if message.author.id == vel_id and "gay" in message.content.lower():
             msg = message.content
 
             idx = msg.lower().find(" gay")
