@@ -46,17 +46,25 @@ class Events(commands.Cog):
 
     @commands.Cog.listener(name="on_message")
     async def vel_event(self, message: discord.Message):
-        vel_id = 234455334033293312
-        if message.author.id == vel_id and "gay" in message.content.lower():
+        vel_id = 136586501436735488  # 234455334033293312
+        if message.author.id == vel_id and (
+            " gay" in message.content.lower() or "gay" in message.content.lower()
+        ):
             msg = message.content
 
-            idx = msg.lower().find("gay")
-            ln = 28
-            text = msg[: idx + 3] if idx < ln - 3 else msg[idx - (ln - 3) : idx + 3]
+            idx = msg.lower().find(" gay")
+            ln = 44
+            if idx == -1:  # no space
+                idx = 0
+                text = msg[: idx + 3] if idx < ln - 3 else msg[idx - (ln - 3) : idx + 3]
+            else:
+                text = msg[: idx + 4] if idx < ln - 4 else msg[idx - (ln - 4) : idx + 4]
             text = text.strip()
-            text = "-" + text + "-"
-            font = ImageFont.truetype("calibrib.ttf", 16)
-            text = self.get_wrapped_text(text, font, 54)
+            if text != msg.lower():
+                text = "-" + text + "-"
+            size = 16 if len(text) > 20 else 24
+            font = ImageFont.truetype("calibrib.ttf", size)
+            text = self.get_wrapped_text(text, font, 100)
 
             avatar = message.author.display_avatar
             fn = str(vel_id) + "_temp"
