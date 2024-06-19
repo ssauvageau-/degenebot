@@ -6,6 +6,8 @@ from discord.flags import Intents
 from dotenv import load_dotenv
 
 from logging_config import setup_logging
+from commands.assign_role import AssignRoleCommandGroup
+from commands.tags import TagSystemGroup
 from commands.misc import MiscCommandCog
 from commands.moderation import ModerationCommandGroup
 from events import Events
@@ -27,6 +29,8 @@ class DegeneBot(commands.Bot):
         await self.add_cog(Events(self))
         await self.add_cog(MiscCommandCog(self))
 
+        self.tree.add_command(AssignRoleCommandGroup(self))
+        self.tree.add_command(TagSystemGroup(self))
         self.tree.add_command(ModerationCommandGroup(self))
 
         if ENV == "dev":

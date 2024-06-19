@@ -16,7 +16,7 @@ class MiscCommandCog(commands.Cog):
         self.mobile_path = "images/MobileDiscord.png"
         self.embed_path = "images/EmbedDiscord.png"
         self.log_channel = "degen-log"
-        self.quote_channel = "quotes"
+        self.quote_channel = "evidence"
         super().__init__()
 
     @app_commands.command(name="f", description="Pay respects. 'to' is optional.")
