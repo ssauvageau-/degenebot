@@ -132,7 +132,7 @@ class TagSystemGroup(app_commands.Group, name="tag"):
         async def approval_callback(interaction: discord.Interaction):
             # We don't use this Interaction but Discord *will* send it into our override, so we need to catch it
             await submission.user.send(
-                f"Your tag: `{tag}` has been approved on the Grim Dawn server!"
+                f"Your tag: `{tag}` has been approved on the Degenerals server!"
             )
             await interaction.message.channel.send(
                 f"Tag `{tag}` approved by {interaction.user}."
