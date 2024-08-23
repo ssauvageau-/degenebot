@@ -1,4 +1,6 @@
 import base64
+import sys
+from decimal import Decimal
 import os
 import json
 from typing import Dict, List
@@ -8,14 +10,11 @@ from discord import ui
 from discord import app_commands
 from discord.ext import commands
 
-from dotenv import load_dotenv
-
 
 @app_commands.guild_only()
-class RatingCommandGroup(app_commands.Group, name="rate"):
+class RatingCommandGroup(app_commands.Group, name="rating"):
     def __init__(self, bot: commands.Bot):
-        load_dotenv()
-        self.rating_json_path = os.getenv("RATINGS_JSON_PATH")
+        self.rating_json_path = "json/ratings.json"
         try:
             self.rating_dict = self.load_ratings()
         except json.decoder.JSONDecodeError:
@@ -62,11 +61,11 @@ class RatingCommandGroup(app_commands.Group, name="rate"):
             )
             ovr += int(values["Overall"])
             num += 1
-        self.rating_dict[content]["avg_ins"] = ins / num
-        self.rating_dict[content]["avg_voc"] = voc / num
-        self.rating_dict[content]["avg_lyr"] = lyr / num
-        self.rating_dict[content]["avg_emo"] = emo / num
-        self.rating_dict[content]["avg_ovr"] = ovr / num
+        self.rating_dict[content]["avg_ins"] = str(Decimal(ins) / Decimal(num))
+        self.rating_dict[content]["avg_voc"] = str(Decimal(voc) / Decimal(num))
+        self.rating_dict[content]["avg_lyr"] = str(Decimal(lyr) / Decimal(num))
+        self.rating_dict[content]["avg_emo"] = str(Decimal(emo) / Decimal(num))
+        self.rating_dict[content]["avg_ovr"] = str(Decimal(ovr) / Decimal(num))
 
     def get_comments(self, content):
         com = []
@@ -74,6 +73,24 @@ class RatingCommandGroup(app_commands.Group, name="rate"):
             if values["Comments"]:
                 com.append(values["Comments"])
         return com
+
+    def get_highest_field(self, field: str) -> (str, Decimal):
+        hk = ""
+        hv = 0
+        for key, values in self.rating_dict.items():
+            if Decimal(values[field]) > Decimal(hv):
+                hk = key
+                hv = values[field]
+        return hk, hv
+
+    def get_lowest_field(self, field: str) -> (str, Decimal):
+        hk = ""
+        hv = sys.maxsize
+        for key, values in self.rating_dict.items():
+            if Decimal(values[field]) < Decimal(hv):
+                hk = key
+                hv = values[field]
+        return hk, hv
 
     def load_ratings(self) -> Dict[str, Dict]:
         with open(self.rating_json_path, "r", encoding="utf-8") as disk_lib:
@@ -88,6 +105,44 @@ class RatingCommandGroup(app_commands.Group, name="rate"):
 
     def decode_rating_data(self, data: str) -> str:
         return base64.b64decode(data.encode("utf-8")).decode("utf-8")
+
+    async def field_autocomplete(
+        self, interaction: discord.Interaction, current: str
+    ) -> List[app_commands.Choice[str]]:
+        choices = ["Instrumentals", "Vocals", "Lyrics", "Emotion/Feeling", "Overall"]
+        return [
+            app_commands.Choice(name=choice, value=choice)
+            for choice in choices
+            if current.lower() in choice.lower()
+        ]
+
+    async def type_autocomplete(
+        self, interaction: discord.Interaction, current: str
+    ) -> List[app_commands.Choice[str]]:
+        choices = ["Highest", "Lowest"]
+        return [
+            app_commands.Choice(name=choice, value=choice)
+            for choice in choices
+            if current.lower() in choice.lower()
+        ]
+
+    @app_commands.command(name="stats")
+    @app_commands.autocomplete(field=field_autocomplete, extreme=type_autocomplete)
+    async def stats(self, interaction: discord.Interaction, extreme: str, field: str):
+        fconv = {
+            "Instrumentals": "avg_ins",
+            "Vocals": "avg_voc",
+            "Lyrics": "avg_lyr",
+            "Emotion/Feeling": "avg_emo",
+            "Overall": "avg_ovr",
+        }
+        if extreme == "Highest":
+            ret = self.get_highest_field(fconv[field])
+        else:
+            ret = self.get_lowest_field(fconv[field])
+        await interaction.response.send_message(
+            f"The submission with the {extreme.lower()} `{field}` score is `{ret[0]}` at `{ret[1]}`!"
+        )
 
     async def rating_autocomplete(
         self, interaction: discord.Interaction, current: str
@@ -142,6 +197,16 @@ class RatingCommandGroup(app_commands.Group, name="rate"):
         await interaction.response.send_message(
             f"`{name_clean}` has been submitted for review by your peers. See {msg.jump_url}",
             ephemeral=True,
+        )
+
+    @app_commands.command(name="comments")
+    @app_commands.autocomplete(content=rating_autocomplete)
+    async def comments(self, interaction: discord.Interaction, content: str):
+        newline = "\n\t"
+        await interaction.response.send_message(
+            f"Here is what people are saying about {content}:"
+            f"\n\n"
+            f"{newline.join(self.get_comments(content))}"
         )
 
     @app_commands.command(
@@ -225,3 +290,8 @@ class RatingCommandGroup(app_commands.Group, name="rate"):
         }
         self.recompute_averages(content)
         self.dump_ratings()
+
+    @app_commands.command(name="download")
+    async def download(self, interaction: discord.Interaction):
+        self.dump_ratings()
+        await interaction.response.send_message(file=discord.File("json/ratings.json"))
