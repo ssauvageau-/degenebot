@@ -223,7 +223,7 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
         newline = "\n\t"
         await interaction.response.send_message(
             f"Here is what people are saying about {content}:"
-            f"\n\n"
+            f"\n\n\t"
             f"{newline.join(self.get_comments(content))}",
             ephemeral=ast.literal_eval(hidden) or False if not hidden else True,
         )
