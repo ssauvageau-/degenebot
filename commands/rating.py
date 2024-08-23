@@ -99,7 +99,7 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
 
     def dump_ratings(self) -> None:
         with open(self.rating_json_path, "w", encoding="utf-8") as disk_lib:
-            disk_lib.write(json.dumps(self.rating_dict, sort_keys=True))
+            disk_lib.write(json.dumps(self.rating_dict, sort_keys=True, indent=4))
 
     def encode_rating_data(self, data: str) -> str:
         return base64.b64encode(data.encode("utf-8")).decode("utf-8")
