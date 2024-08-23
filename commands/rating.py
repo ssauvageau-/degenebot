@@ -182,7 +182,7 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
         msg = await self.bot.get_channel(int(rating_channel.id)).send(
             f"{interaction.user.mention} has submitted `{name_clean}` for rating by you, their peers!"
             f"\n\t\t{content_clean}"
-            f"\nTo rate this content, please use the `/rate submit {name_clean}` command."
+            f"\nTo rate this content, please use the `/rating submit {name_clean}` command."
         )
         self.rating_dict[name_clean] = {
             "content": content_clean,
