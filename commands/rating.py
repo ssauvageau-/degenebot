@@ -254,6 +254,7 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
             com = ui.TextInput(
                 label="Comments",
                 style=discord.TextStyle.short,
+                max_length=300,
                 row=4,
                 placeholder="",
                 required=False,
