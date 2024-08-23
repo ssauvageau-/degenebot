@@ -62,11 +62,21 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
             )
             ovr += int(values["Overall"])
             num += 1
-        self.rating_dict[content]["avg_ins"] = str(Decimal(ins) / Decimal(num))
-        self.rating_dict[content]["avg_voc"] = str(Decimal(voc) / Decimal(num))
-        self.rating_dict[content]["avg_lyr"] = str(Decimal(lyr) / Decimal(num))
-        self.rating_dict[content]["avg_emo"] = str(Decimal(emo) / Decimal(num))
-        self.rating_dict[content]["avg_ovr"] = str(Decimal(ovr) / Decimal(num))
+        self.rating_dict[content]["avg_ins"] = str(
+            max(Decimal(ins) / Decimal(num), Decimal(5))
+        )
+        self.rating_dict[content]["avg_voc"] = str(
+            max(Decimal(voc) / Decimal(num), Decimal(5))
+        )
+        self.rating_dict[content]["avg_lyr"] = str(
+            max(Decimal(lyr) / Decimal(num), Decimal(5))
+        )
+        self.rating_dict[content]["avg_emo"] = str(
+            max(Decimal(emo) / Decimal(num), Decimal(5))
+        )
+        self.rating_dict[content]["avg_ovr"] = str(
+            max(Decimal(ovr) / Decimal(num), Decimal(5))
+        )
 
     def get_comments(self, content):
         com = []
