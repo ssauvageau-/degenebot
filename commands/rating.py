@@ -1,9 +1,10 @@
+import ast
 import base64
 import sys
 from decimal import Decimal
 import os
 import json
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import discord
 from discord import ui
@@ -199,14 +200,32 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
             ephemeral=True,
         )
 
+    async def ephem_autocomplete(
+        self, interaction: discord.Interaction, current: str
+    ) -> List[app_commands.Choice[str]]:
+        choices = ["True", "False"]
+        ratings = [
+            app_commands.Choice(name=choice, value=choice)
+            for choice in choices
+            if current.lower() in choice.lower()
+        ]
+        if len(ratings) > 25:
+            return ratings[:25]
+            # Discord autocomplete only supports 25 elements
+            # Without this, users are not shown any elements of the tag list when total tags > 25
+        return ratings
+
     @app_commands.command(name="comments")
-    @app_commands.autocomplete(content=rating_autocomplete)
-    async def comments(self, interaction: discord.Interaction, content: str):
+    @app_commands.autocomplete(content=rating_autocomplete, hidden=ephem_autocomplete)
+    async def comments(
+        self, interaction: discord.Interaction, content: str, hidden: Optional[str]
+    ):
         newline = "\n\t"
         await interaction.response.send_message(
             f"Here is what people are saying about {content}:"
             f"\n\n"
-            f"{newline.join(self.get_comments(content))}"
+            f"{newline.join(self.get_comments(content))}",
+            ephemeral=ast.literal_eval(hidden) or False if not hidden else True,
         )
 
     @app_commands.command(
@@ -221,7 +240,7 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
                 style=discord.TextStyle.short,
                 min_length=0,
                 max_length=3,
-                placeholder="Rate the instrumental components of the content.",
+                placeholder="(1->5 or N/A) Rate the instrumental components of the content.",
                 required=True,
             )
             voc = ui.TextInput(
@@ -230,7 +249,7 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
                 style=discord.TextStyle.short,
                 min_length=0,
                 max_length=3,
-                placeholder="Rate the vocal performance of the content.",
+                placeholder="(1->5 or N/A) Rate the vocal performance of the content.",
                 required=True,
             )
             lyr = ui.TextInput(
@@ -239,7 +258,7 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
                 style=discord.TextStyle.short,
                 min_length=0,
                 max_length=3,
-                placeholder="Rate the lyrical quality of the content.",
+                placeholder="(1->5 or N/A) Rate the lyrical quality of the content.",
                 required=True,
             )
             emo = ui.TextInput(
@@ -248,7 +267,7 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
                 style=discord.TextStyle.short,
                 min_length=0,
                 max_length=3,
-                placeholder="Rate the emotional impact of the content.",
+                placeholder="(1->5 or N/A) Rate the emotional impact of the content.",
                 required=True,
             )
             com = ui.TextInput(
@@ -274,7 +293,7 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
         overall = 0
         for i in range(len(vals)):
             try:
-                vals[i] = int(vals[i])  # if not an int, goes to except
+                vals[i] = int(vals[i])  # if not int-decipherable, goes to except
                 vals[i] = max(
                     min(5, int(vals[i])), 1
                 )  # constrict ratings to 1->5 range
@@ -295,4 +314,6 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
     @app_commands.command(name="download")
     async def download(self, interaction: discord.Interaction):
         self.dump_ratings()
-        await interaction.response.send_message(file=discord.File("json/ratings.json"))
+        await interaction.response.send_message(
+            file=discord.File("json/ratings.json"), ephemeral=True
+        )
