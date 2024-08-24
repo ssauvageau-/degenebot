@@ -231,12 +231,19 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
         self, interaction: discord.Interaction, content: str, hidden: Optional[str]
     ):
         newline = "\n\t"
-        await interaction.response.send_message(
-            f"Here is what people are saying about {content}:"
-            f"\n\n\t"
-            f"{newline.join(self.get_comments(content))}",
-            ephemeral=ast.literal_eval(hidden) or False if not hidden else True,
-        )
+        if hidden:
+            await interaction.response.send_message(
+                f"Here is what people are saying about {content}:"
+                f"\n\n\t"
+                f"{newline.join(self.get_comments(content))}",
+                ephemeral=ast.literal_eval(hidden),
+            )
+        else:
+            await interaction.response.send_message(
+                f"Here is what people are saying about {content}:"
+                f"\n\n\t"
+                f"{newline.join(self.get_comments(content))}"
+            )
 
     @app_commands.command(
         name="submit", description="Rate a piece of content from your peers"
@@ -326,4 +333,20 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
         self.dump_ratings()
         await interaction.response.send_message(
             file=discord.File("json/ratings.json"), ephemeral=True
+        )
+
+    @app_commands.command(name="averages")
+    @app_commands.autocomplete(content=rating_autocomplete)
+    async def averages(self, interaction: discord.Interaction, content: str):
+        k = self.rating_dict.get(content)
+        ins = k["avg_ins"]
+        voc = k["avg_voc"]
+        lyr = k["avg_lyr"]
+        emo = k["avg_emo"]
+        await interaction.response.send_message(
+            f"{content} has average ratings as follows:\n"
+            f"\t**Instrumentals**:\t{ins}\n"
+            f"\t**Vocals**:\t{voc}\n"
+            f"\t**Lyrics**:\t{lyr}\n"
+            f"\t**Emotions/Feeling**:\t{emo}\n"
         )
