@@ -377,7 +377,7 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
         for k, v in self.rating_dict.items():
             keys.append(k)
             vals.append(float(v[self.fconv[field]]))
-        plt.plot(keys, vals)
+        plt.bar(keys, vals)
         plt.suptitle(f"{field} Ratings")
         if field == "Overall":
             plt.ylim(0, 20)
