@@ -434,3 +434,25 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
         await interaction.response.send_message(
             "Averages have been recalculated.", ephemeral=True
         )
+
+    @app_commands.command(
+        name="rename",
+        description="Rename content. Consider this process critical, even though steps have been taken to preserve information.",
+    )
+    @app_commands.checks.has_any_role("Actual Admin")
+    @app_commands.autocomplete(content=rating_autocomplete)
+    async def rename(self, interaction: discord.Interaction, content: str, name: str):
+        if name in self.rating_dict.keys():
+            await interaction.response.send_message(
+                f"{name} is already in use by another submission!"
+            )
+            return
+        if content in self.rating_dict.keys():
+            self.rating_dict[name] = self.rating_dict.pop(content)
+            await interaction.response.send_message(
+                f"{content} has successfully been renamed to {name}!"
+            )
+        else:
+            await interaction.response.send_message(
+                f"Invalid content name in critical process: {content}"
+            )
