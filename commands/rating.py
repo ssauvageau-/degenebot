@@ -388,3 +388,11 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
         plt.savefig(fname=fn)
         await interaction.response.send_message(file=discord.File(fn))
         os.unlink(fn)
+
+    @app_commands.command(name="list")
+    async def content_list(self, interaction: discord.Interaction):
+        keys = []
+        nl = "\n"
+        for k, v in self.rating_dict.items():
+            keys.append(k)
+        await interaction.response.send_message(f"{nl.join(keys)}")
