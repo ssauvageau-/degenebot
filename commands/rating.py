@@ -379,7 +379,10 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
             vals.append(float(v[self.fconv[field]]))
         plt.plot(keys, vals)
         plt.suptitle(f"{field} Ratings")
-        plt.ylim(0, 5)
+        if field == "Overall":
+            plt.ylim(0, 20)
+        else:
+            plt.ylim(0, 5)
         plt.tight_layout()
         fn = "graph_output.png"
         plt.savefig(fname=fn)
