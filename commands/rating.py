@@ -40,6 +40,8 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
 
     def recompute_averages(self, content):
         num = ins = voc = lyr = emo = ovr = 0
+        if len(self.rating_dict.get(content).get("ratings")) == 0:
+            return
         for keys, values in self.rating_dict.get(content).get("ratings").items():
             ins += (
                 int(values["Instrumentals"])
@@ -410,7 +412,7 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
         merge = []
         nl = "\n"
         for k, v in self.rating_dict.items():
-            if interaction.user.name not in v:
+            if interaction.user.name not in v["ratings"]:
                 l = v["content"]
                 merge.append(f"[{k}](<{l}>)")
         if len(merge) == 0:
