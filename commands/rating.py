@@ -28,7 +28,7 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
                 os.makedirs("json")
             os.close(os.open(self.rating_json_path, os.O_CREAT))
         self.bot = bot
-        self.rating_channel_name = "music-ratings"
+        self.rating_channel_name = "music-rating-submissions"
         self.fconv = {
             "Instrumentals": "avg_ins",
             "Vocals": "avg_voc",
@@ -51,21 +51,21 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
             voc += (
                 int(values["Vocals"])
                 if values["Vocals"] != "N/A"
-                else ins / num
+                else voc / num
                 if num > 0
                 else 0
             )
             lyr += (
                 int(values["Lyrics"])
                 if values["Lyrics"] != "N/A"
-                else ins / num
+                else lyr / num
                 if num > 0
                 else 0
             )
             emo += (
                 int(values["Emotion/Feeling"])
                 if values["Emotion/Feeling"] != "N/A"
-                else ins / num
+                else emo / num
                 if num > 0
                 else 0
             )
