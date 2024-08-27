@@ -72,19 +72,19 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
             ovr += int(values["Overall"])
             num += 1
         self.rating_dict[content]["avg_ins"] = str(
-            max(Decimal(ins) / Decimal(num), Decimal(5))
+            min(Decimal(ins) / Decimal(num), Decimal(5))
         )
         self.rating_dict[content]["avg_voc"] = str(
-            max(Decimal(voc) / Decimal(num), Decimal(5))
+            min(Decimal(voc) / Decimal(num), Decimal(5))
         )
         self.rating_dict[content]["avg_lyr"] = str(
-            max(Decimal(lyr) / Decimal(num), Decimal(5))
+            min(Decimal(lyr) / Decimal(num), Decimal(5))
         )
         self.rating_dict[content]["avg_emo"] = str(
-            max(Decimal(emo) / Decimal(num), Decimal(5))
+            min(Decimal(emo) / Decimal(num), Decimal(5))
         )
         self.rating_dict[content]["avg_ovr"] = str(
-            max(Decimal(ovr) / Decimal(num), Decimal(5))
+            min(Decimal(ovr) / Decimal(num), Decimal(5))
         )
 
     def get_comments(self, content):
@@ -423,3 +423,12 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
                 f"{interaction.user.mention}, you still have the following pieces of content to rate:\n{nl.join(merge)}",
                 ephemeral=True,
             )
+
+    @app_commands.command(name="recompute")
+    @app_commands.checks.has_any_role("Actual Admin")
+    async def force_recompute(self, interaction: discord.Interaction):
+        for k, v in self.rating_dict.items():
+            self.recompute_averages(k)
+        await interaction.response.send_message(
+            "Averages have been recalculated.", ephemeral=True
+        )
