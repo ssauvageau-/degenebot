@@ -437,7 +437,7 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
 
     @app_commands.command(
         name="rename",
-        description="Rename content. Consider this process critical, even though steps have been taken to preserve information.",
+        description="Consider this process critical, even though steps have been taken to preserve information.",
     )
     @app_commands.checks.has_any_role("Actual Admin")
     @app_commands.autocomplete(content=rating_autocomplete)
