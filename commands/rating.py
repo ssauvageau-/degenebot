@@ -120,11 +120,17 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
         with open(self.rating_json_path, "w", encoding="utf-8") as disk_lib:
             disk_lib.write(json.dumps(self.rating_dict, sort_keys=True, indent=4))
 
-    def encode_rating_data(self, data: str) -> str:
-        return base64.b64encode(data.encode("utf-8")).decode("utf-8")
-
-    def decode_rating_data(self, data: str) -> str:
-        return base64.b64decode(data.encode("utf-8")).decode("utf-8")
+    def wrap_words(self, text: str, k: int = 3, *, sep: str = None) -> str:
+        text = text.strip().split(sep)
+        res = ""
+        for index, item in enumerate(text):
+            # add \n for every k items (it runs at first iteration too because 0%num is equal to 0 ever)
+            if index % k == 0:
+                res += "\n"
+            # add every item to result
+            res += item + " "
+        # remove first \n and return
+        return res[1:].strip()
 
     async def field_autocomplete(
         self, interaction: discord.Interaction, current: str
@@ -375,7 +381,7 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
         keys = []
         vals = []
         for k, v in self.rating_dict.items():
-            keys.append(k)
+            keys.append(self.wrap_words(k))
             vals.append(float(v[self.fconv[field]]))
         plt.bar(keys, vals)
         plt.suptitle(f"{field} Ratings")
@@ -392,20 +398,27 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
 
     @app_commands.command(name="list")
     async def content_list(self, interaction: discord.Interaction):
-        keys = []
+        merge = []
         nl = "\n"
         for k, v in self.rating_dict.items():
-            keys.append(k)
-        await interaction.response.send_message(f"{nl.join(keys)}")
+            l = v["content"]
+            merge.append(f"[{k}](<{l}>)")
+        await interaction.response.send_message(f"{nl.join(merge)}")
 
     @app_commands.command(name="todo")
     async def todo(self, interaction: discord.Interaction):
-        keys = []
+        merge = []
         nl = "\n"
         for k, v in self.rating_dict.items():
             if interaction.user.name not in v:
-                keys.append(k)
-        await interaction.response.send_message(
-            f"{interaction.user.mention}, you still have the following pieces of content to rate:\n{nl.join(keys)}",
-            ephemeral=True,
-        )
+                l = v["content"]
+                merge.append(f"[{k}](<{l}>)")
+        if len(merge) == 0:
+            await interaction.response.send_message(
+                f"{interaction.user.mention}, you have rated all submitted content. Nicely done!"
+            )
+        else:
+            await interaction.response.send_message(
+                f"{interaction.user.mention}, you still have the following pieces of content to rate:\n{nl.join(merge)}",
+                ephemeral=True,
+            )
