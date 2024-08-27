@@ -11,6 +11,8 @@ from discord import ui
 from discord import app_commands
 from discord.ext import commands
 
+import matplotlib.pyplot as plt
+
 
 @app_commands.guild_only()
 class RatingCommandGroup(app_commands.Group, name="rating"):
@@ -363,7 +365,8 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
         self.rating_dict.pop(content, None)
         self.dump_ratings()
         await interaction.response.send_message(
-            f"{content} has been dropped from the rating JSON successfully."
+            f"{content} has been dropped from the rating JSON successfully.",
+            ephemeral=True,
         )
 
     @app_commands.command(name="graph")
@@ -373,6 +376,12 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
         vals = []
         for k, v in self.rating_dict.items():
             keys.append(k)
-            vals.append(v[self.fconv[field]])
-        await interaction.response.send_message(f"{keys}, {vals}")
-        ...
+            vals.append(float(v[self.fconv[field]]))
+        plt.plot(keys, vals)
+        plt.suptitle(f"{field} Ratings")
+        plt.ylim(0, 5)
+        plt.tight_layout()
+        fn = "graph_output.png"
+        plt.savefig(fname=fn)
+        await interaction.response.send_message(file=discord.File(fn))
+        os.unlink(fn)
