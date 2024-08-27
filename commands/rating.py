@@ -86,7 +86,7 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
             min(Decimal(emo) / Decimal(num), Decimal(5))
         )
         self.rating_dict[content]["avg_ovr"] = str(
-            min(Decimal(ovr) / Decimal(num), Decimal(5))
+            min(Decimal(ovr) / Decimal(num), Decimal(20))
         )
 
     def get_comments(self, content):
