@@ -415,7 +415,8 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
                 merge.append(f"[{k}](<{l}>)")
         if len(merge) == 0:
             await interaction.response.send_message(
-                f"{interaction.user.mention}, you have rated all submitted content. Nicely done!"
+                f"{interaction.user.mention}, you have rated all submitted content. Nicely done!",
+                ephemeral=True,
             )
         else:
             await interaction.response.send_message(
