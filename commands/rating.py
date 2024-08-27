@@ -27,6 +27,13 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
             os.close(os.open(self.rating_json_path, os.O_CREAT))
         self.bot = bot
         self.rating_channel_name = "music-ratings"
+        self.fconv = {
+            "Instrumentals": "avg_ins",
+            "Vocals": "avg_voc",
+            "Lyrics": "avg_lyr",
+            "Emotion/Feeling": "avg_emo",
+            "Overall": "avg_ovr",
+        }
         super().__init__()
 
     def recompute_averages(self, content):
@@ -140,17 +147,10 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
     @app_commands.command(name="stats")
     @app_commands.autocomplete(field=field_autocomplete, extreme=type_autocomplete)
     async def stats(self, interaction: discord.Interaction, extreme: str, field: str):
-        fconv = {
-            "Instrumentals": "avg_ins",
-            "Vocals": "avg_voc",
-            "Lyrics": "avg_lyr",
-            "Emotion/Feeling": "avg_emo",
-            "Overall": "avg_ovr",
-        }
         if extreme == "Highest":
-            ret = self.get_highest_field(fconv[field])
+            ret = self.get_highest_field(self.fconv[field])
         else:
-            ret = self.get_lowest_field(fconv[field])
+            ret = self.get_lowest_field(self.fconv[field])
         await interaction.response.send_message(
             f"The submission with the {extreme.lower()} `{field}` score is `{ret[0]}` at `{ret[1]}`!"
         )
@@ -350,3 +350,29 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
             f"\t**Lyrics**:\t{lyr}\n"
             f"\t**Emotions/Feeling**:\t{emo}\n"
         )
+
+    @app_commands.command(name="drop")
+    @app_commands.autocomplete(content=rating_autocomplete)
+    @app_commands.checks.has_any_role("Actual Admin")
+    async def del_key(self, interaction: discord.Interaction, content: str):
+        if interaction.user.id == 95664950743142400:
+            await interaction.response.send_message(
+                "Sorry, Jared, I do not trust you to not delete TSwift submissions as they appear."
+            )
+            return
+        self.rating_dict.pop(content, None)
+        self.dump_ratings()
+        await interaction.response.send_message(
+            f"{content} has been dropped from the rating JSON successfully."
+        )
+
+    @app_commands.command(name="graph")
+    @app_commands.autocomplete(field=field_autocomplete)
+    async def graph(self, interaction: discord.Interaction, field: str):
+        keys = []
+        vals = []
+        for k, v in self.rating_dict.items():
+            keys.append(k)
+            vals.append(v[self.fconv[field]])
+        await interaction.response.send_message(f"{keys}, {vals}")
+        ...
