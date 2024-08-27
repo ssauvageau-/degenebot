@@ -383,6 +383,7 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
             plt.ylim(0, 20)
         else:
             plt.ylim(0, 5)
+        plt.xticks(list(range(0, len(keys), 1)), keys, rotation=45)
         plt.tight_layout()
         fn = "graph_output.png"
         plt.savefig(fname=fn)
@@ -396,3 +397,15 @@ class RatingCommandGroup(app_commands.Group, name="rating"):
         for k, v in self.rating_dict.items():
             keys.append(k)
         await interaction.response.send_message(f"{nl.join(keys)}")
+
+    @app_commands.command(name="todo")
+    async def todo(self, interaction: discord.Interaction):
+        keys = []
+        nl = "\n"
+        for k, v in self.rating_dict.items():
+            if interaction.user.name not in v:
+                keys.append(k)
+        await interaction.response.send_message(
+            f"{interaction.user.mention}, you still have the following pieces of content to rate:\n{nl.join(keys)}",
+            ephemeral=True,
+        )
