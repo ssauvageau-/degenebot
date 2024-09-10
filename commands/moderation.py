@@ -96,10 +96,13 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
                 if user.id == member.id:
                     roles.append(role.name)
                     mem = member
+        print("Succeeded role acquisition.")
         channels = []
         for channel in interaction.guild.channels:
             channels.append(f"{channel.name}: {channel.permissions_for(mem).value:b}")
+        print("Succeeded channel acquisition.")
         newline = "\n\t"
         ret = f"User has Roles:\n\t{newline.join(roles)}\n\nUser has channel overrides:\n\t{newline.join(channels)}"
         await interaction.response.send_message(ret, ephemeral=True)
+        print("Send response.")
         return ret
