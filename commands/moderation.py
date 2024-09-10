@@ -101,4 +101,11 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
             channels.append(f"{channel.name}: {channel.permissions_for(mem).value:b}")
         newline = "\n\t"
         ret = f"User has Roles:\n\t{newline.join(roles)}\n\nUser has channel overrides:\n\t{newline.join(channels)}"
-        await interaction.response.send_message(ret, ephemeral=True)
+        if len(ret) < 2000:
+            await interaction.response.send_message(ret, ephemeral=True)
+        else:
+            fn = "out.txt"
+            with open(fn, "w") as f:
+                f.write(ret)
+            await interaction.response.send_message(file=fn, ephemeral=True)
+            os.unlink(fn)
