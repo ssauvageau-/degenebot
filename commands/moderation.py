@@ -79,29 +79,25 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
             f"Successfully moved {channel_name} to {category_name}."
         )
 
-    async def get_user_perms(
-        self, guild: discord.Interaction.guild, user: discord.User
-    ) -> str:
-        roles = []
-        mem = ""
-        for role in guild.roles:
-            for member in role.members:
-                if user.id == member.id:
-                    roles.append(role.name)
-                    mem = member
-        channels = []
-        for channel in guild.channels:
-            channels.append(f"{channel.name}: {channel.permissions_for(mem).value:b}")
-        newline = "\n\t"
-        ret = f"User has Roles:\n\t{newline.join(roles)}\n\nUser has channel overrides:\n\t{newline.join(channels)}"
-        return ret
-
     @app_commands.command(
         name="user_perms",
         description="Get the roles and channel permission overrides of a user.",
     )
     @app_commands.checks.has_any_role(*COMMAND_ROLE_ALLOW_LIST)
-    async def user_perms(self, interaction: discord.Interaction, user: discord.User):
-        await interaction.response.send_message(
-            await self.get_user_perms(interaction.guild, user), ephemeral=True
-        )
+    async def get_user_perms(
+        self, interaction: discord.Interaction, user: discord.User
+    ) -> str:
+        roles = []
+        mem = ""
+        for role in interaction.guild.roles:
+            for member in role.members:
+                if user.id == member.id:
+                    roles.append(role.name)
+                    mem = member
+        channels = []
+        for channel in interaction.guild.channels:
+            channels.append(f"{channel.name}: {channel.permissions_for(mem).value:b}")
+        newline = "\n\t"
+        ret = f"User has Roles:\n\t{newline.join(roles)}\n\nUser has channel overrides:\n\t{newline.join(channels)}"
+        await interaction.response.send_message(ret, ephemeral=True)
+        return ret
