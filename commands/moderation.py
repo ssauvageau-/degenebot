@@ -107,5 +107,7 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
             fn = "out.txt"
             with open(fn, "w") as f:
                 f.write(ret)
-            await interaction.response.send_message(file=fn, ephemeral=True)
+            await interaction.response.send_message(
+                file=discord.File(fn), ephemeral=True
+            )
             os.unlink(fn)
