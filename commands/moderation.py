@@ -79,7 +79,7 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
             f"Successfully moved {channel_name} to {category_name}."
         )
 
-    def get_user_perms(
+    async def get_user_perms(
         self, guild: discord.Interaction.guild, user: discord.User
     ) -> str:
         roles = []
@@ -103,5 +103,5 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
     @app_commands.checks.has_any_role(*COMMAND_ROLE_ALLOW_LIST)
     async def user_perms(self, interaction: discord.Interaction, user: discord.User):
         await interaction.response.send_message(
-            self.get_user_perms(interaction.guild, user), ephemeral=True
+            await self.get_user_perms(interaction.guild, user), ephemeral=True
         )
