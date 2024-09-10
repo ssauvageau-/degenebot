@@ -90,6 +90,8 @@ class ModerationCommandGroup(app_commands.Group, name="moderation"):
         roles = []
         mem = ""
         for role in interaction.guild.roles:
+            if "everyone" in role.name:
+                continue
             for member in role.members:
                 if user.id == member.id:
                     roles.append(role.name)
