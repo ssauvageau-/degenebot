@@ -1,3 +1,4 @@
+import asyncio
 import os
 from typing import Optional
 
@@ -135,6 +136,18 @@ class MiscCommandCog(commands.Cog):
             os.remove(fn_o)
         else:
             print(f"Error occurred when deleting file:\t{fn_o}")
+
+    @app_commands.command(name="rr")
+    async def rachael_response(self, interaction: discord.Interaction):
+        await interaction.response.send_message("Memeing Rachael:", ephemeral=True)
+        chan = interaction.channel
+        await chan.send("Yes")
+        await asyncio.sleep(1)
+        await chan.send("Absolutely")
+        await asyncio.sleep(1)
+        await chan.send("For sure")
+        await asyncio.sleep(1)
+        await chan.send("You go queen")
 
     @app_commands.command(name="embed")
     async def embed_image(self, interaction: discord.Interaction, user: discord.User):
