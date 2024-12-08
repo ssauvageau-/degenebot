@@ -282,6 +282,26 @@ class Events(commands.Cog):
             )
 
     @commands.Cog.listener(name="on_message")
+    async def rachael_clown_event(self, message: discord.Message):
+        if message.author.bot:
+            return
+        if message.channel.id == 445399787278434314:
+            if message.author.id == 165939197763387401:
+                window_min = (
+                    datetime.now()
+                    .replace(hour=1, minute=30, second=0, microsecond=0)
+                    .time()
+                )
+                window_max = (
+                    datetime.now()
+                    .replace(hour=2, minute=30, second=0, microsecond=0)
+                    .time()
+                )
+                msg_time = message.created_at.time()
+                if window_min < msg_time < window_max:
+                    await message.reply(content="🤡")
+
+    @commands.Cog.listener(name="on_message")
     async def masked_url_event(self, message: discord.Message):
         if message.author.bot:
             return
