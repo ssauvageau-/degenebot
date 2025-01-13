@@ -289,12 +289,12 @@ class Events(commands.Cog):
             if message.author.id == 165939197763387401:
                 window_min = (
                     datetime.now()
-                    .replace(hour=1, minute=30, second=0, microsecond=0)
+                    .replace(hour=3, minute=30, second=0, microsecond=0)
                     .time()
                 )
                 window_max = (
                     datetime.now()
-                    .replace(hour=2, minute=30, second=0, microsecond=0)
+                    .replace(hour=4, minute=30, second=0, microsecond=0)
                     .time()
                 )
                 msg_time = message.created_at.time()

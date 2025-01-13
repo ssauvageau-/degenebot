@@ -149,6 +149,32 @@ class MiscCommandCog(commands.Cog):
         await asyncio.sleep(1)
         await chan.send("You go queen")
 
+    @app_commands.command(name="dnd_voice")
+    async def dnd_voice(self, interaction: discord.Interaction):
+        dnd_role_id = 96791637031665664
+        dnd_channel_id = 218875887519531008
+        guild = interaction.guild
+        for chan in guild.channels:
+            if isinstance(chan, discord.VoiceChannel):
+                for mem in chan.members:
+                    if dnd_role_id in [n.id for n in mem.roles]:
+                        await mem.move_to(guild.get_channel(dnd_channel_id))
+        await interaction.response.send_message("Moved connected users to D&D Channel!")
+
+    @app_commands.command(name="book_voice")
+    async def book_voice(self, interaction: discord.Interaction):
+        dnd_role_id = 1198432640462766111
+        dnd_channel_id = 218875887519531008
+        guild = interaction.guild
+        for chan in guild.channels:
+            if isinstance(chan, discord.VoiceChannel):
+                for mem in chan.members:
+                    if dnd_role_id in [n.id for n in mem.roles]:
+                        await mem.move_to(guild.get_channel(dnd_channel_id))
+        await interaction.response.send_message(
+            "Moved connected users to Book Club Channel!"
+        )
+
     @app_commands.command(name="embed")
     async def embed_image(self, interaction: discord.Interaction, user: discord.User):
         avatar = user.display_avatar
