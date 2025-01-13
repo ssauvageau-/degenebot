@@ -152,17 +152,17 @@ class MiscCommandCog(commands.Cog):
     @app_commands.command(name="dnd_voice")
     async def dnd_voice(self, interaction: discord.Interaction):
         dnd_role_id = 96791637031665664
-        id = interaction.user.id
         for mem in interaction.guild.members:
-            if mem.id == id:
+            if mem.id == interaction.user.id:
                 if dnd_role_id in [n.id for n in mem.roles]:
                     dnd_channel_id = 218875887519531008
-                    guild = interaction.guild
-                    for chan in guild.channels:
+                    for chan in interaction.guild.channels:
                         if isinstance(chan, discord.VoiceChannel):
                             for mem in chan.members:
                                 if dnd_role_id in [n.id for n in mem.roles]:
-                                    await mem.move_to(guild.get_channel(dnd_channel_id))
+                                    await mem.move_to(
+                                        interaction.guild.get_channel(dnd_channel_id)
+                                    )
                     await interaction.response.send_message(
                         "Moved connected users to D&D Channel!", ephemeral=True
                     )
@@ -176,18 +176,16 @@ class MiscCommandCog(commands.Cog):
     @app_commands.command(name="book_voice")
     async def book_voice(self, interaction: discord.Interaction):
         book_role_id = 1198432640462766111
-        id = interaction.user.id
         for mem in interaction.guild.members:
-            if mem.id == id:
+            if mem.id == interaction.user.id:
                 if book_role_id in [n.id for n in mem.roles]:
                     book_channel_id = 218875887519531008
-                    guild = interaction.guild
-                    for chan in guild.channels:
+                    for chan in interaction.guild.channels:
                         if isinstance(chan, discord.VoiceChannel):
                             for mem in chan.members:
                                 if book_role_id in [n.id for n in mem.roles]:
                                     await mem.move_to(
-                                        guild.get_channel(book_channel_id)
+                                        interaction.guild.get_channel(book_channel_id)
                                     )
                     await interaction.response.send_message(
                         "Moved connected users to Book Club Channel!", ephemeral=True
