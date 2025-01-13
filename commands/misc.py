@@ -152,28 +152,42 @@ class MiscCommandCog(commands.Cog):
     @app_commands.command(name="dnd_voice")
     async def dnd_voice(self, interaction: discord.Interaction):
         dnd_role_id = 96791637031665664
-        dnd_channel_id = 218875887519531008
-        guild = interaction.guild
-        for chan in guild.channels:
-            if isinstance(chan, discord.VoiceChannel):
-                for mem in chan.members:
-                    if dnd_role_id in [n.id for n in mem.roles]:
-                        await mem.move_to(guild.get_channel(dnd_channel_id))
-        await interaction.response.send_message("Moved connected users to D&D Channel!")
+        if dnd_role_id in [n.id for n in interaction.user.roles]:
+            dnd_channel_id = 218875887519531008
+            guild = interaction.guild
+            for chan in guild.channels:
+                if isinstance(chan, discord.VoiceChannel):
+                    for mem in chan.members:
+                        if dnd_role_id in [n.id for n in mem.roles]:
+                            await mem.move_to(guild.get_channel(dnd_channel_id))
+            await interaction.response.send_message(
+                "Moved connected users to D&D Channel!", ephemeral=True
+            )
+        else:
+            await interaction.response.send_message(
+                "You must have the relevant D&D role to use this command!",
+                ephemeral=True,
+            )
 
     @app_commands.command(name="book_voice")
     async def book_voice(self, interaction: discord.Interaction):
-        dnd_role_id = 1198432640462766111
-        dnd_channel_id = 218875887519531008
-        guild = interaction.guild
-        for chan in guild.channels:
-            if isinstance(chan, discord.VoiceChannel):
-                for mem in chan.members:
-                    if dnd_role_id in [n.id for n in mem.roles]:
-                        await mem.move_to(guild.get_channel(dnd_channel_id))
-        await interaction.response.send_message(
-            "Moved connected users to Book Club Channel!"
-        )
+        book_role_id = 1198432640462766111
+        if book_role_id in [n.id for n in interaction.user.roles]:
+            book_channel_id = 218875887519531008
+            guild = interaction.guild
+            for chan in guild.channels:
+                if isinstance(chan, discord.VoiceChannel):
+                    for mem in chan.members:
+                        if book_role_id in [n.id for n in mem.roles]:
+                            await mem.move_to(guild.get_channel(book_channel_id))
+            await interaction.response.send_message(
+                "Moved connected users to Book Club Channel!", ephemeral=True
+            )
+        else:
+            await interaction.response.send_message(
+                "You must have the relevant Book Club role to use this command!",
+                ephemeral=True,
+            )
 
     @app_commands.command(name="embed")
     async def embed_image(self, interaction: discord.Interaction, user: discord.User):
