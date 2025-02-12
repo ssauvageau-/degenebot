@@ -18,6 +18,7 @@ class MiscCommandCog(commands.Cog):
         self.embed_path = "images/EmbedDiscord.png"
         self.log_channel = "degen-log"
         self.quote_channel = "evidence"
+        self.channel_hist = []
         super().__init__()
 
     @app_commands.command(name="f", description="Pay respects. 'to' is optional.")
@@ -163,8 +164,9 @@ class MiscCommandCog(commands.Cog):
                                     await mem.move_to(
                                         interaction.guild.get_channel(dnd_channel_id)
                                     )
+                                    self.channel_hist.append((mem, chan))
                     await interaction.response.send_message(
-                        "Moved connected users to D&D Channel!", ephemeral=True
+                        "Moved connected users to D&D Channel!"
                     )
                 else:
                     await interaction.response.send_message(
@@ -187,8 +189,9 @@ class MiscCommandCog(commands.Cog):
                                     await mem.move_to(
                                         interaction.guild.get_channel(book_channel_id)
                                     )
+                                    self.channel_hist.append((mem, chan))
                     await interaction.response.send_message(
-                        "Moved connected users to Book Club Channel!", ephemeral=True
+                        "Moved connected users to Book Club Channel!"
                     )
                 else:
                     await interaction.response.send_message(
@@ -196,6 +199,20 @@ class MiscCommandCog(commands.Cog):
                         ephemeral=True,
                     )
                 break
+
+    @app_commands.command(name="return_voice")
+    async def return_voice(self, interaction: discord.Interaction):
+        if self.channel_hist:
+            for mem, chan in self.channel_hist:
+                await mem.move_to(chan)
+            self.channel_hist.clear()
+            await interaction.response.send_message(
+                "Moved connected voice users to their original channels!"
+            )
+        else:
+            await interaction.response.send_message(
+                "No channel history stored for connected voice participants."
+            )
 
     @app_commands.command(name="embed")
     async def embed_image(self, interaction: discord.Interaction, user: discord.User):
