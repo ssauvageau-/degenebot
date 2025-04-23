@@ -203,8 +203,9 @@ class ActivityCommandGroup(app_commands.Group, name="activity"):
     ):
         for user in self.act_dict:
             for i in range(len(self.act_dict[user])):
-                if self.act_dict[user][i] is activity:
+                if self.act_dict[user][i] == activity:
                     self.act_dict[user][i] = new_name
         await interaction.response.send_message(
             f"Renamed {activity} to {new_name} for all users.", ephemeral=True
         )
+        self.dump_acts()
