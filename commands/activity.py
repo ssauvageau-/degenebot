@@ -192,3 +192,19 @@ class ActivityCommandGroup(app_commands.Group, name="activity"):
         await interaction.response.send_message(
             f"You no longer partake in {activity}.", ephemeral=True
         )
+
+    @app_commands.command(
+        name="rename",
+        description="Renames the given activity for all users that partake in it.",
+    )
+    @app_commands.autocomplete(activity=activity_autocomplete)
+    async def rename_activity(
+        self, interaction: discord.Interaction, activity: str, new_name: str
+    ):
+        for user in self.act_dict:
+            for i in range(len(self.act_dict[user])):
+                if self.act_dict[user][i] is activity:
+                    self.act_dict[user][i] = new_name
+        await interaction.response.send_message(
+            f"Renamed {activity} to {new_name} for all users.", ephemeral=True
+        )
