@@ -1,7 +1,7 @@
 import json
 import os
 
-from typing import Dict
+from typing import Dict, List
 
 import discord
 from discord import ui
@@ -151,4 +151,44 @@ class ActivityCommandGroup(app_commands.Group, name="activity"):
             f"{interaction.user.mention}, choose {min_u} to {max_u} users to find an activity between.",
             view=members,
             ephemeral=True,
+        )
+
+    async def activity_autocomplete(
+        self, interaction: discord.Interaction, current: str
+    ) -> List[app_commands.Choice[str]]:
+        choices = set()
+        user = interaction.user.global_name
+        if user not in self.act_dict:
+            return []
+        for act in self.act_dict[interaction.user.global_name]:
+            choices.add(act)
+        return [
+            app_commands.Choice(name=choice, value=choice)
+            for choice in choices
+            if current.lower() in choice.lower()
+        ]
+
+    @app_commands.command(
+        name="remove-self",
+        description="Removes the given activity from your roster of activities. Only affects you.",
+    )
+    @app_commands.autocomplete(activity=activity_autocomplete)
+    async def remove_self_from_activity(
+        self, interaction: discord.Interaction, activity: str
+    ):
+        user = interaction.user.global_name
+        if user not in self.act_dict:
+            await interaction.response.send_message(
+                "You do not currently partake in any activities.", ephemeral=True
+            )
+        elif activity not in self.act_dict[user]:
+            await interaction.response.send_message(
+                f"You do not currently partake in {activity}.", ephemeral=True
+            )
+        self.act_dict[user].remove(activity)
+        if len(self.act_dict[user]) == 0:
+            self.act_dict.pop(user)
+        self.dump_acts()
+        await interaction.response.send_message(
+            f"You no longer partake in {activity}.", ephemeral=True
         )
