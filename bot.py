@@ -11,6 +11,7 @@ from commands.tags import TagSystemGroup
 from commands.misc import MiscCommandCog
 from commands.moderation import ModerationCommandGroup
 from commands.rating import RatingCommandGroup
+from commands.activity import ActivityCommandGroup
 from events import Events
 
 load_dotenv()
@@ -34,6 +35,7 @@ class DegeneBot(commands.Bot):
         self.tree.add_command(TagSystemGroup(self))
         self.tree.add_command(ModerationCommandGroup(self))
         self.tree.add_command(RatingCommandGroup(self))
+        self.tree.add_command(ActivityCommandGroup(self))
 
         if ENV == "dev":
             self.tree.copy_global_to(guild=TEST_GUILD)
