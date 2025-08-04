@@ -203,9 +203,7 @@ class MiscCommandCog(commands.Cog):
 
     @app_commands.command(name="eject")
     async def eject(self, interaction: discord.Interaction):
-        await interaction.response.send_message(
-            f"Searching for the voice call {interaction.user.display_name} is in..."
-        )
+        await interaction.response.defer()
         for mem in interaction.guild.members:
             if mem.id == interaction.user.id:
                 if mem.voice.channel:
@@ -218,21 +216,21 @@ class MiscCommandCog(commands.Cog):
                         "a place of debauchery and sin",
                     ]
                     ch = random.choice(syns)
-                    await interaction.response.edit_message(
-                        content=f"Ejecting {mem.display_name} from {ch} in 3..."
+                    await interaction.followup.send(
+                        f"Ejecting {mem.display_name} from {ch} in 3..."
                     )
                     await asyncio.sleep(1)
-                    await interaction.response.edit_message(content="2...")
+                    await interaction.followup.send("2...")
                     await asyncio.sleep(1)
-                    await interaction.response.edit_message(content="1...")
+                    await interaction.followup.send("1...")
                     await asyncio.sleep(1)
                     await mem.edit(voice_channel=None)
-                    await interaction.response.edit_message(
-                        content=f"Successfully ejected {mem.display_name} from {ch}."
+                    await interaction.followup.send(
+                        f"Successfully ejected {mem.display_name} from {ch}."
                     )
                     return
-        await interaction.response.edit_message(
-            content="Could not find you in any voice calls!", ephemeral=True
+        await interaction.followup.send(
+            "Could not find you in any voice calls!", ephemeral=True
         )
 
     @app_commands.command(name="return_voice")
