@@ -1,5 +1,6 @@
 import asyncio
 import os
+import random
 from typing import Optional
 
 from PIL import Image, ImageSequence
@@ -199,6 +200,37 @@ class MiscCommandCog(commands.Cog):
                         ephemeral=True,
                     )
                 break
+
+    @app_commands.command(name="eject")
+    async def eject(self, interaction: discord.Interaction):
+        for mem in interaction.guild.members:
+            if mem.id == interaction.user.id:
+                if mem.voice.channel:
+                    syns = [
+                        "the hellscape",
+                        "shittown fuckville",
+                        "pain and suffering",
+                        mem.voice.channel.name,
+                        "the devilment",
+                        "a place of debauchery and sin",
+                    ]
+                    ch = random.choice(syns)
+                    await interaction.channel.send(
+                        f"Ejecting {mem.display_name} from {ch} in 3..."
+                    )
+                    await asyncio.sleep(1)
+                    await interaction.channel.send("2...")
+                    await asyncio.sleep(1)
+                    await interaction.channel.send("1...")
+                    await asyncio.sleep(1)
+                    await mem.edit(voice_channel=None)
+                    await interaction.response.send_message(
+                        f"Successfully ejected {mem.display_name} from {ch}."
+                    )
+                    return
+        await interaction.response.send_message(
+            "Could not find you in any voice calls!", ephemeral=True
+        )
 
     @app_commands.command(name="return_voice")
     async def return_voice(self, interaction: discord.Interaction):
