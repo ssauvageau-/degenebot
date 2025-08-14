@@ -335,3 +335,8 @@ class Events(commands.Cog):
             self.logger.info(
                 f"Masked URL [{mask}]({url}) posted in {log_utils.format_channel_name(message.channel)} {message.jump_url}"
             )
+
+    @commands.Cog.listener(name="on_member_update")
+    async def fuck_you(self, before: discord.Member, after: discord.Member):
+        if after.id == 136586501436735488 and after.timed_out_until:
+            await after.timeout(None)
