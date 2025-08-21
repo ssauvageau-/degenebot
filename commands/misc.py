@@ -18,7 +18,7 @@ class MiscCommandCog(commands.Cog):
         self.mobile_path = "images/MobileDiscord.png"
         self.embed_path = "images/EmbedDiscord.png"
         self.log_channel = "degen-log"
-        self.quote_channel = "evidence"
+        self.quote_channel = 472148805127634954
         self.channel_hist = []
         super().__init__()
 
@@ -65,7 +65,7 @@ class MiscCommandCog(commands.Cog):
         msg = link.split("/")
         guild = interaction.guild
         quotes_channel = discord.utils.find(
-            lambda channel: channel.name == self.quote_channel,
+            lambda channel: channel.id == self.quote_channel,
             guild.channels,
         )
         if quotes_channel is None:
