@@ -7,6 +7,7 @@ from PIL import Image, ImageSequence
 import discord
 from discord import app_commands
 from discord.ext import commands
+from dotenv import load_dotenv
 
 from utils import log_utils
 
@@ -14,11 +15,13 @@ from utils import log_utils
 @app_commands.guild_only()
 class MiscCommandCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
+        load_dotenv()
         self.bot = bot
         self.mobile_path = "images/MobileDiscord.png"
         self.embed_path = "images/EmbedDiscord.png"
         self.log_channel = "degen-log"
         self.quote_channel = 472148805127634954
+        self.degen_channel = os.getenv("DEGEN_CHANNEL_ID")
         self.channel_hist = []
         super().__init__()
 
@@ -254,6 +257,28 @@ class MiscCommandCog(commands.Cog):
             await interaction.response.send_message(
                 "No channel history stored for connected voice participants."
             )
+
+    @app_commands.command(name="foghorn")
+    async def backup_foghorn(self, interaction: discord.Interaction):
+        if os.path.exists("foghorn.txt"):
+            await interaction.response.send_message("No.", ephemeral=True)
+        else:
+            dgn_chn = self.bot.get_channel(int(self.degen_channel))
+            chan = interaction.channel
+            await interaction.response.send_message(
+                "Sending foghorn warning.", ephemeral=True
+            )
+            await chan.send("# ATTENTION ALL USERS")
+            await asyncio.sleep(1)
+            await chan.send("# SERVER BACKUP PROCESS HAS BEEN INITIALIZED")
+            await asyncio.sleep(1)
+            await chan.send(
+                "# EVERY SUNDAY AT 1600 UTC, PINNED MESSAGES AND QUOTES WILL BE BACKED UP IN DEGENBOT'S DATABASE"
+            )
+            await asyncio.sleep(1)
+            await chan.send(f"# FOLLOW {dgn_chn.mention} FOR UPDATES")
+            with open("foghorn.txt", "w") as fp:
+                pass
 
     @app_commands.command(name="embed")
     async def embed_image(self, interaction: discord.Interaction, user: discord.User):

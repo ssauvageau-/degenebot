@@ -60,6 +60,7 @@ class BackupCog(commands.Cog, name="Backups"):
             self.guild = os.getenv("TEST_GUILD")
         self.degen_channel = os.getenv("DEGEN_CHANNEL_ID")
         self.quotes_channel = 472148805127634954
+        self.batch_update.start()
         super().__init__()
 
     @tasks.loop(time=times)
