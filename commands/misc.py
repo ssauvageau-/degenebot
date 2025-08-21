@@ -85,14 +85,22 @@ class MiscCommandCog(commands.Cog):
         await interaction.response.send_message("Quoted the supplied message!")
 
     @app_commands.command(name="pfp", description="Receive a user's profile picture.")
-    async def pfp(self, interaction: discord.Interaction, user: discord.User):
+    @app_commands.describe(
+        ephem="Whether the bot should send the message only to you (True) or post it publicly (False)."
+    )
+    async def pfp(
+        self,
+        interaction: discord.Interaction,
+        user: discord.User,
+        ephem: Optional[bool] = False,
+    ):
         avatar = user.display_avatar
         if avatar.is_animated():
             fn = str(user.id) + ".gif"
         else:
             fn = str(user.id) + ".png"
         await avatar.save(fn)
-        await interaction.response.send_message(file=discord.File(fn), ephemeral=True)
+        await interaction.response.send_message(file=discord.File(fn), ephemeral=ephem)
         if os.path.exists(fn):
             os.remove(fn)
         else:
