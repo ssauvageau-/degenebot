@@ -1,6 +1,7 @@
 import os
 
 import discord
+import redis.asyncio as redis
 from discord.ext import commands
 from discord.flags import Intents
 from dotenv import load_dotenv
@@ -12,6 +13,7 @@ from commands.misc import MiscCommandCog
 from commands.moderation import ModerationCommandGroup
 from commands.rating import RatingCommandGroup
 from commands.activity import ActivityCommandGroup
+from utils.backup import BackupCog
 from events import Events
 
 load_dotenv()
@@ -28,8 +30,16 @@ class DegeneBot(commands.Bot):
         super().__init__(command_prefix="!", intents=intents, activity=activity)
 
     async def setup_hook(self):
+        redis_client = redis.Redis(host="redis", port=6379, decode_responses=True)
+        try:
+            await redis_client.ping()
+        except Exception as e:
+            print("Could not connect to Redis:", e)
+            if ENV == "prod":
+                exit(1)
         await self.add_cog(Events(self))
         await self.add_cog(MiscCommandCog(self))
+        await self.add_cog(BackupCog(self, redis_client))
 
         self.tree.add_command(AssignRoleCommandGroup(self))
         self.tree.add_command(TagSystemGroup(self))
