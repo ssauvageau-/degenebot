@@ -21,7 +21,6 @@ class Events(commands.Cog):
         self.logger = logging.getLogger("bot")
         self.log_channel_name = "degen-log"
         self.bot = bot
-        self.timeline = {}
         self.vel_meme_path = "images/VelMeme.png"
 
     @commands.Cog.listener(name="on_error")
