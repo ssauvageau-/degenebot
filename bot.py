@@ -30,7 +30,7 @@ class DegeneBot(commands.Bot):
         super().__init__(command_prefix="!", intents=intents, activity=activity)
 
     async def setup_hook(self):
-        redis_client = redis.Redis(host="redis", port=6379, decode_responses=True)
+        redis_client = redis.Redis(host="redis", port=6379, decode_responses=False)
         try:
             await redis_client.ping()
         except Exception as e:

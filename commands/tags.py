@@ -25,7 +25,7 @@ class TagSystemGroup(app_commands.Group, name="tag"):
             if not os.path.exists("json"):
                 os.makedirs("json")
             os.close(os.open(self.tag_json_path, os.O_CREAT))
-        self.approval_channel = os.getenv("TAG_APPROVAL_ID")
+        self.degen_channel = os.getenv("DEGEN_CHANNEL_ID")
         self.bot = bot
         super().__init__()
 
@@ -77,7 +77,7 @@ class TagSystemGroup(app_commands.Group, name="tag"):
             )
             return
         else:  # redundant but indented for clarity
-            await self.bot.get_channel(int(self.approval_channel)).send(
+            await self.bot.get_channel(int(self.degen_channel)).send(
                 embed=self.create_embed(interaction, tag_clean, content_clean),
                 view=await self.create_approval_buttons(
                     interaction, tag_clean, content_clean
