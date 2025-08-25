@@ -11,6 +11,7 @@ import os
 import json
 from datetime import datetime, time, timezone, date, timedelta
 from dotenv import load_dotenv
+import logging
 
 utc = timezone.utc
 times = [time(hour=16, tzinfo=utc)]
@@ -52,6 +53,7 @@ class BackupCog(commands.Cog, name="Backups"):
     def __init__(self, bot: commands.Bot, redis_client: redis.Redis):
         load_dotenv()
         self.bot = bot
+        self.logger = logging.getLogger("bot")
         self.redis_client = redis_client
         self.env = os.getenv("ENV")
         if self.env == "prod":
@@ -97,7 +99,7 @@ class BackupCog(commands.Cog, name="Backups"):
                     "# NO NEW QUOTES TO BACK UP"
                 )
         except Exception as error:
-            print(f"Error during backup process:\n\t{error}")
+            self.logger.error(f"Error during backup process:\n\t{error}")
         await self.bot.get_channel(int(self.degen_channel)).send(
             "# BACK UP PROCESS CONCLUDING\n# SEE YOU NEXT WEEK"
         )
