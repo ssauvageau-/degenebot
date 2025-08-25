@@ -72,27 +72,32 @@ class BackupCog(commands.Cog, name="Backups"):
         await self.bot.get_channel(int(self.degen_channel)).send(
             "# COMMENCING BACK UP PROCESS"
         )
-        pdict = await self.redis_client.hgetall("PINS")
-        for chan in guild.text_channels:
-            if chan.pins():
-                content = await get_pinned_content(chan)
-                if chan.name in pdict:
-                    pdict[chan.name] = pdict[chan.name] | content
-                else:
-                    pdict[chan.name] = content
-        await self.redis_client.hset("PINS", json.dumps(pdict))
-        await self.bot.get_channel(int(self.degen_channel)).send("# PINS BACKED UP")
-        new_quotes = await self.backup_quotes(guild)
-        if new_quotes:
-            qdict = await self.redis_client.hgetall("QUOTES")
-            await self.redis_client.hset("QUOTES", json.dumps(qdict | new_quotes))
-            await self.bot.get_channel(int(self.degen_channel)).send(
-                f"# {len(new_quotes)} QUOTES BACKED UP"
-            )
-        else:
-            await self.bot.get_channel(int(self.degen_channel)).send(
-                "# NO NEW QUOTES TO BACK UP"
-            )
+        try:
+            pdict = await self.redis_client.hgetall("PINS")
+            if not pdict:
+                pdict = {}
+            for chan in guild.text_channels:
+                if chan.pins():
+                    content = await get_pinned_content(chan)
+                    if chan.name in pdict:
+                        pdict[chan.name] = pdict[chan.name] | content
+                    else:
+                        pdict[chan.name] = content
+            await self.redis_client.hset("PINS", json.dumps(pdict))
+            await self.bot.get_channel(int(self.degen_channel)).send("# PINS BACKED UP")
+            new_quotes = await self.backup_quotes(guild)
+            if new_quotes:
+                qdict = await self.redis_client.hgetall("QUOTES")
+                await self.redis_client.hset("QUOTES", json.dumps(qdict | new_quotes))
+                await self.bot.get_channel(int(self.degen_channel)).send(
+                    f"# {len(new_quotes)} QUOTES BACKED UP"
+                )
+            else:
+                await self.bot.get_channel(int(self.degen_channel)).send(
+                    "# NO NEW QUOTES TO BACK UP"
+                )
+        except Exception as error:
+            print(f"Error during backup process:\n\t{error}")
         await self.bot.get_channel(int(self.degen_channel)).send(
             "# BACK UP PROCESS CONCLUDING\n# SEE YOU NEXT WEEK"
         )
