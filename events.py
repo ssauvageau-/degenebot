@@ -228,7 +228,7 @@ class Events(commands.Cog):
             return
 
         if message.content.lower() == "based":
-            if random.randint(1, 10) == 2:
+            if random.randint(1, 5) == 2:
                 await message.reply(content="Based? Based on what?")
 
     @commands.Cog.listener(name="on_message")
@@ -280,25 +280,25 @@ class Events(commands.Cog):
                 f"Thinkematics {think} triggered by {message.author.display_name} {think_message.jump_url}"
             )
 
-    @commands.Cog.listener(name="on_message")
-    async def rachael_clown_event(self, message: discord.Message):
-        if message.author.bot:
-            return
-        if message.channel.id == 445399787278434314:
-            if message.author.id == 165939197763387401:
-                window_min = (
-                    datetime.now()
-                    .replace(hour=3, minute=30, second=0, microsecond=0)
-                    .time()
-                )
-                window_max = (
-                    datetime.now()
-                    .replace(hour=4, minute=30, second=0, microsecond=0)
-                    .time()
-                )
-                msg_time = message.created_at.time()
-                if window_min < msg_time < window_max:
-                    await message.reply(content="🤡")
+    # @commands.Cog.listener(name="on_message")
+    # async def rachael_clown_event(self, message: discord.Message):
+    #     if message.author.bot:
+    #         return
+    #     if message.channel.id == 445399787278434314:
+    #         if message.author.id == 165939197763387401:
+    #             window_min = (
+    #                 datetime.now()
+    #                 .replace(hour=3, minute=30, second=0, microsecond=0)
+    #                 .time()
+    #             )
+    #             window_max = (
+    #                 datetime.now()
+    #                 .replace(hour=4, minute=30, second=0, microsecond=0)
+    #                 .time()
+    #             )
+    #             msg_time = message.created_at.time()
+    #             if window_min < msg_time < window_max:
+    #                 await message.reply(content="🤡")
 
     @commands.Cog.listener(name="on_message")
     async def masked_url_event(self, message: discord.Message):
