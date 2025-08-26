@@ -20,8 +20,10 @@ class Events(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.logger = logging.getLogger("bot")
         self.log_channel_name = "degen-log"
+        self.log_channel_name_md = "degen-log-md"
         self.bot = bot
         self.vel_meme_path = "images/VelMeme.png"
+        self.last_deleted = 0
 
     @commands.Cog.listener(name="on_error")
     async def log_error(self, event: str, *args, **kwargs):
@@ -42,6 +44,7 @@ class Events(commands.Cog):
 
         if message.content.lower() == "nerd":
             await message.channel.send(message.content)
+            self.last_deleted = message.id
             await message.delete()
             self.logger.info(f"nerd event triggered on message {message.jump_url}")
 
@@ -275,6 +278,7 @@ class Events(commands.Cog):
         think = thinkematics_tm.get(pruned)
         if think is not None:
             think_message = await message.channel.send(think)
+            self.last_deleted = message.id
             await message.delete()
             self.logger.info(
                 f"Thinkematics {think} triggered by {message.author.display_name} {think_message.jump_url}"
@@ -339,3 +343,37 @@ class Events(commands.Cog):
     async def fuck_you(self, before: discord.Member, after: discord.Member):
         if after.id == 136586501436735488 and after.timed_out_until:
             await after.timeout(None)
+
+    @commands.Cog.listener(name="on_message_delete")
+    async def message_deleted(self, message: discord.Message):
+        if message.id == self.last_deleted:
+            return
+        log_channel = discord.utils.find(
+            lambda channel: channel.name == self.log_channel_name_md,
+            message.channel.guild.channels,
+        )
+        if log_channel is None:
+            raise Exception("Log channel not found")
+
+        formatted_message = message.content.replace("```", "``").replace("\n", "\n- ")
+        log_embed = discord.Embed(
+            color=discord.Color.red(),
+            title="Messaage Deleted",
+            description=f"```diff\n- {formatted_message}\n```",
+            timestamp=datetime.now(tz=utc),
+        )
+        log_embed.set_author(
+            name=message.author.display_name,
+            icon_url=message.author.display_avatar.url,
+        )
+        log_embed.set_footer(text=f"#{message.channel.name}")
+
+        if len(message.attachments) > 0:
+            log_embed.add_field(
+                name="Files",
+                value="\n".join(
+                    [att.url or att.proxy_url for att in message.attachments]
+                ),
+            )
+
+        await log_channel.send(embed=log_embed)
