@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 import os
 import random
 from typing import Optional
@@ -279,6 +280,17 @@ class MiscCommandCog(commands.Cog):
             await chan.send(f"# FOLLOW {dgn_chn.mention} FOR UPDATES")
             with open("foghorn.txt", "w") as fp:
                 pass
+
+    @app_commands.command(name="sha256")
+    async def sha256(self, interaction: discord.Interaction, msg: discord.Message):
+        enc = "utf-8"
+        h = hashlib.sha256(bytes(msg.content.lower(), enc))
+        await interaction.response.send_message(
+            f"SHA256 Hash of Message: {h}", ephemeral=True
+        )
+        await interaction.followup.send_message(
+            f"Message Key: {msg.author.name + str(h)}", ephemeral=True
+        )
 
     @app_commands.command(name="embed")
     async def embed_image(self, interaction: discord.Interaction, user: discord.User):
