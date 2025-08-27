@@ -282,7 +282,7 @@ class MiscCommandCog(commands.Cog):
                 pass
 
     @app_commands.command(name="sha_test")
-    async def sha256(self, interaction: discord.Interaction, msg: discord.Message):
+    async def sha(self, interaction: discord.Interaction, msg: discord.Message):
         enc = "utf-8"
         h = hashlib.sha256(bytes(msg.content.lower(), enc))
         await interaction.response.send_message(
