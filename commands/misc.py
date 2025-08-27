@@ -291,7 +291,7 @@ class MiscCommandCog(commands.Cog):
         channel = guild.get_channel(channel_id)
         msg = await channel.fetch_message(message_id)
         enc = "utf-8"
-        h = str(hashlib.sha256(bytes(msg.content.lower(), enc)))
+        h = hashlib.sha256(bytes(msg.content.lower(), enc)).hexdigest()
         await interaction.followup.send(f"SHA256 Hash of Message: {h}", ephemeral=True)
         await interaction.followup.send(
             f"Message Key: {msg.author.name + h}", ephemeral=True
