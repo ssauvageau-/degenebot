@@ -281,8 +281,9 @@ class MiscCommandCog(commands.Cog):
             with open("foghorn.txt", "w") as fp:
                 pass
 
-    @app_commands.command(name="test_command")
+    @app_commands.command(name="sha")
     async def test_sha(self, interaction: discord.Interaction, link: str):
+        await interaction.response.defer()
         msg = link.split("/")
         guild = interaction.guild
         channel_id = int(msg[5])
@@ -290,12 +291,10 @@ class MiscCommandCog(commands.Cog):
         channel = guild.get_channel(channel_id)
         msg = await channel.fetch_message(message_id)
         enc = "utf-8"
-        h = hashlib.sha256(bytes(msg.content.lower(), enc))
-        await interaction.response.send_message(
-            f"SHA256 Hash of Message: {h}", ephemeral=True
-        )
-        await interaction.followup.send_message(
-            f"Message Key: {msg.author.name + str(h)}", ephemeral=True
+        h = str(hashlib.sha256(bytes(msg.content.lower(), enc)))
+        await interaction.followup.send(f"SHA256 Hash of Message: {h}", ephemeral=True)
+        await interaction.followup.send(
+            f"Message Key: {msg.author.name + h}", ephemeral=True
         )
 
     @app_commands.command(name="embed")
