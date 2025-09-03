@@ -377,3 +377,15 @@ class Events(commands.Cog):
             )
 
         await log_channel.send(embed=log_embed)
+
+    @commands.Cog.listener(name="on_raw_reaction_add")
+    async def x_reaction(self, payload: discord.RawReactionActionEvent):
+        if payload.emoji.name == "❌":
+            channel = self.bot.get_channel(payload.channel_id)
+            message = await channel.fetch_message(payload.message_id)
+            reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
+            if reaction.count >= 4:
+                self.logger.info(
+                    f"Message {payload.message_id} reached 4 X reactions, deleting."
+                )
+                await message.delete()
